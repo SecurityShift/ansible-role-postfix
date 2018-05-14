@@ -1,0 +1,86 @@
+---
+# Defines tasks to install and configure Postfix
+
+- name: Include the OS specific varibles
+  include_vars: "{{ ansible_os_family }}.yml"
+  tags:
+    - postfix
+
+- name: set roots mail alias
+  lineinfile:
+    dest: /etc/aliases
+    line: "{{ item.name }}: {{ item.alias }}"
+    regexp: "^{{ item.name }}:.*"
+  with_items:
+    - '{{ mailaliases }}'
+  notify: update aliases database
+  tags:
+    - mail
+
+- name: Install postfix packages
+  yum:
+    name: postfix
+    state: latest
+  tags:
+    - postfix
+
+- name: Write SMTP authentication template
+  template:
+    src: sasl_passwd.j2
+    dest: '{{ postfix_config_dir }}/sasl_passwd'
+    mode: 0600
+    owner: root
+    group: root
+  notify:
+    - postmap sasl
+  when: postfix_use_smtp and postfix_relayhost_user and postfix_relayhost_pass
+  tags:
+    - postfix
+
+- name: Write Postfix configuration template
+  template:
+    src: main-cf.j2
+    dest: '{{ postfix_config_dir }}/main.cf'
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - restart postfix
+  tags:
+    - postfix
+
+- name: Write Postfix configuration for masquerading
+  template:
+    src: recipient_canonical_map.j2
+    dest: '{{ postfix_config_dir }}/recipient_canonical_map'
+    mode: 0644
+    owner: root
+    group: root
+  notify:
+    - restart postfix
+  tags:
+    - postfix
+  when:
+    - postfix_masquerade_address is defined
+
+- name: Make sure services can pass through firewall
+  firewalld:
+    rich_rule: "rule family=ipv4 source address={{ ipv4_location_prefix }} service name=smtp accept"
+    permanent: true
+    immediate: true
+    zone: public
+    state: enabled
+  when:
+    - postfix_inet_interfaces != 'loopback-only'
+    - firewalld_state != 'stopped'
+  notify:
+    - reload firewalld
+
+- name: Start Postfix on server boot
+  service:
+    name: '{{ postfix_service }}'
+    state: started
+    enabled: yes
+  tags:
+    - postfix
+

@@ -19,8 +19,11 @@
 
 - name: Install postfix packages
   yum:
-    name: postfix
+    name: '{{ item }}'
     state: latest
+  with_items:
+    - postfix
+    - mailx
   tags:
     - postfix
 
@@ -65,16 +68,14 @@
 
 - name: Make sure services can pass through firewall
   firewalld:
-    rich_rule: "rule family=ipv4 source address={{ ipv4_location_prefix }} service name=smtp accept"
+    rich_rule: "rule family=ipv4 source address={{ item }} service name=smtp accept"
     permanent: true
     immediate: true
     zone: public
     state: enabled
-  when:
-    - postfix_inet_interfaces != 'loopback-only'
-    - firewalld_state != 'stopped'
-  notify:
-    - reload firewalld
+  with_items: '{{ postfix_firewall_permit }}'
+  when: firewalld_enabled and postfix_firewall_permit
+  notify: reload firewalld
 
 - name: Start Postfix on server boot
   service:

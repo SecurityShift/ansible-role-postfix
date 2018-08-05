@@ -20,4 +20,5 @@
     name: '{{ postfix_service }}'
     state: restarted
     enabled: yes
+  when: no_restart is not defined and not no_restart
 

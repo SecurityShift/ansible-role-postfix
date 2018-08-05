@@ -1,3 +1,6 @@
+# {{ ansible_managed }}
+# See {{ postfix_role_git_repo }}/blob/master/templates/tmp-postfix-selections.j2
+
 postfix postfix/mailname string {{ ansible_hostname }}.{{ postfix_domain }}
 postfix postfix/main_mailer_type select 'Internet Site'
 postfix postfix/destinations string {{ ansible_hostname }}.{{ postfix_domain }}, localhost.localdomain, localhost

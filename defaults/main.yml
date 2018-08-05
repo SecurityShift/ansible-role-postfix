@@ -2,6 +2,8 @@
 # The variables file used for Postfix playbooks.
 # If not overriden in inventory or as a parameter, this is the value that will be used
 
+postfix_role_git_repo: https://github.com/SecurityShift/ansible-role-postfix
+
 postfix_domain: ''
 postfix_notify_email: false
 postfix_relayhost: ''

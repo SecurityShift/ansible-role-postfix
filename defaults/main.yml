@@ -1,6 +1,5 @@
 ---
-# The variables file used for Postfix playbooks.
-# If not overriden in inventory or as a parameter, this is the value that will be used
+# defaults file for postfix
 
 postfix_role_git_repo: https://github.com/SecurityShift/ansible-role-postfix
 

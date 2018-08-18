@@ -1,5 +1,5 @@
 ---
-# Defines tasks to install and configure Postfix
+# tasks file for postfix
 
 - name: Include the OS specific varibles
   include_vars: "{{ ansible_os_family }}.yml"

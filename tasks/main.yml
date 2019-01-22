@@ -19,11 +19,8 @@
 
 - name: Install postfix packages
   yum:
-    name: '{{ item }}'
-    state: latest
-  with_items:
-    - postfix
-    - mailx
+    name: '{{ postfix_packages }}'
+    state: installed
   tags:
     - postfix
 

@@ -11,8 +11,8 @@
     dest: /etc/aliases
     line: "{{ item.name }}: {{ item.alias }}"
     regexp: "^{{ item.name }}:.*"
-  with_items:
-    - '{{ mailaliases }}'
+  with_items: '{{ mailaliases }}'
+  when: mailaliases is defined
   notify: update aliases database
   tags:
     - mail
@@ -73,6 +73,8 @@
   with_items: '{{ postfix_firewall_permit }}'
   when: firewalld_enabled and postfix_firewall_permit
   notify: reload firewalld
+  tags:
+    - firewall
 
 - name: Start Postfix on server boot
   service:
@@ -80,5 +82,6 @@
     state: started
     enabled: yes
   tags:
+    - service
     - postfix
 
